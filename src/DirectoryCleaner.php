@@ -52,4 +52,23 @@ class DirectoryCleaner
                 $this->filesystem->delete($file);
             });
     }
+    
+    /**
+     * @param int $months
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function deleteFilesOlderThanMonths(int $months) : Collection
+    {
+        $timeInPast = Carbon::now()->subMonths($months);
+
+        return collect($this->filesystem->files($this->directory))
+            ->filter(function ($file) use ($timeInPast) {
+                return Carbon::createFromTimestamp(filemtime($file))
+                    ->lt($timeInPast);
+            })
+            ->each(function ($file) {
+                $this->filesystem->delete($file);
+            });
+    }
 }
